@@ -1,0 +1,225 @@
+<!DOCTYPE html><html lang="fa"><head><meta charset="UTF-8" /><meta name="viewport" content="width=device-width, initial-scale=1" /><title></title><style>
+@import url("https://fonts.googleapis.com/css2?family=Poppins:wght@400;500&display=swap");
+   *{
+      padding: 0;margin: 0;font-size: 15px;
+   }
+   button:focus,button:active{
+      outline: none;
+      box-shadow: none;
+      -webkit-tap-highlight-color: transparent;
+   }
+    body {
+      font-family:"Poppins";
+      font-size: 15px;
+        background: linear-gradient(to bottom, black, green);
+        backdrop-filter: blur(4px);   
+        color: #f9f9f9;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        padding: 0px;
+        min-height: 100vh;
+        margin: 0;
+        box-shadow: 0 0 .4em .1em #8A2BE2;
+    }
+   h1 {
+      transition:1s;
+      font-family: "Poppins";
+      font-size: 3em;
+      background: linear-gradient(to right, #00BFFF, #8A2BE2, #32CD32, #888888);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+      color: transparent;
+      display: inline-block;
+      margin: 1.2em 0em .9em 0em;
+    }
+    p{
+       font-size: 1.3em;
+	margin:0px;
+       margin-bottom: 1.4em;
+       text-align: center;
+       align-items: center;
+       background: linear-gradient(to right, #00BFFF, #8A2BE2, #32CD32, #888888);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+      color: transparent;
+    }
+    input, select, button {
+font-family:"Poppins";
+        padding: 10px;
+        font-size: 1.2em;
+        border-radius: .5em;
+        border: none;
+        margin: 5px 0;
+    }
+   input {
+      box-shadow: 0 0 0em .1em rgb(32,131,255);
+      background: transparent;
+      border: 1px solid #444;
+      direction: ltr;
+      width: 20em;
+      max-width: 90vw;
+      color: #f9f9f9;
+      transition: .22s;
+    }
+   input:hover{
+      background: #333;
+    }
+    input:focus{
+       outline: none;
+      box-shadow: none;
+      -webkit-tap-highlight-color: transparent;
+        box-shadow: 0 0 .4em .1em #8A2BE2;
+    }
+    select {
+        width: 320px;
+        max-width: 95vw;
+        background: #333;
+        color: #eee;
+        
+    }
+   button {
+	display:flex;
+text-align:center;
+justify-content:center;
+      margin: 1em;
+      background:  #00BFFF;
+      color: white;
+      cursor: pointer;
+      transition: background 0.3s ease;
+      width: 9em;
+      max-width: 90vw;
+        transition: .1s;
+   }
+   button:active {
+        background: #8A2BE2;
+        scale: 1.02;
+   }
+    #formats {
+        margin-top: 20px;
+        width: 100%;
+        max-width: 350px;
+    }
+    #message {
+        margin-top: 15px;
+        min-height: 24px;
+    }
+</style></head><body>
+<h1 id="siteTitle"></h1>
+
+<p id="text">دانلودر یوتیوب</p>
+<input type="text" id="url" placeholder="لینک ویدیو یوتیوب را وارد کنید" />
+<button onclick="fetchFormats()">دریافت فرمت‌ها</button>
+<div id="formats" style="display:none;">
+   <select id="formatSelect"></select>
+   <button onclick="download()">دانلود</button>
+</div>
+<div id="message"></div>
+<script>
+const getTitle = document.getElementById("siteTitle");
+const title = "DøwnTube";
+
+if (!getTitle) {
+    console.error("siteTitle پیدا نشد!");
+} else {
+    setTimeout(() => {
+        let i = 0;
+        function typeIt() {
+            if (i < title.length) {
+                getTitle.innerHTML += title.charAt(i);
+                i++;
+                setTimeout(typeIt, 100);
+            }
+        }
+        typeIt();
+    }, 500);
+}
+
+async function fetchFormats() {
+    const url = document.getElementById('url').value.trim();
+    if (!url) {
+        alert('لطفاً لینک ویدیو را وارد کنید.');
+        return;
+    }
+
+    document.getElementById('message').textContent = 'در حال دریافت فرمت‌ها...';
+
+    try {
+        const response = await fetch('/formats', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ url })
+        });
+
+        const data = await response.json();
+
+        if (data.error) {
+            document.getElementById('message').textContent = 'خطا: ' + data.error;
+            document.getElementById('formats').style.display = 'none';
+            return;
+        }
+
+        const select = document.getElementById('formatSelect');
+        select.innerHTML = '';
+
+        // فقط فرمت‌هایی که combined=true دارند را نمایش بده
+        const usableFormats = data.formats.filter(f => f.combined);
+
+        if (usableFormats.length === 0) {
+            document.getElementById('message').textContent = 'فرمت قابل دانلود (ویدیو+صدا) یافت نشد.';
+            document.getElementById('formats').style.display = 'none';
+            return;
+        }
+
+        usableFormats.forEach(f => {
+            const sizeMB = f.filesize ? (f.filesize / (1024 * 1024)).toFixed(2) : 'نامشخص';
+            const text = `${f.ext.toUpperCase()} - ${f.resolution || ''} - ${f.fps ? f.fps + 'fps' : ''} - ${sizeMB} MB`;
+            const option = document.createElement('option');
+            option.value = f.format_id;
+            option.textContent = text;
+            select.appendChild(option);
+        });
+
+        document.getElementById('message').textContent = `عنوان: ${data.title}`;
+        document.getElementById('formats').style.display = 'block';
+
+    } catch (e) {
+        document.getElementById('message').textContent = 'خطا: ' + e.message;
+        document.getElementById('formats').style.display = 'none';
+    }
+}
+
+async function download() {
+    const url = document.getElementById('url').value.trim();
+    const format_id = document.getElementById('formatSelect').value;
+
+    if (!url || !format_id) {
+        alert('لطفاً لینک و فرمت را انتخاب کنید.');
+        return;
+    }
+
+    document.getElementById('message').textContent = 'در حال دانلود...';
+
+    try {
+        const response = await fetch('/download', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ url, format_id })
+        });
+
+        const data = await response.json();
+
+        if (data.error) {
+            document.getElementById('message').textContent = 'خطا: ' + data.error;
+            return;
+        }
+
+        document.getElementById('message').textContent = data.message;
+
+    } catch (e) {
+        document.getElementById('message').textContent = 'خطا: ' + e.message;
+    }
+}
+</script></body></html>

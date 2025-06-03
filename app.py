@@ -28,11 +28,11 @@ def formats():
             acodec = f.get('acodec')
             vcodec = f.get('vcodec')
             ext = f.get('ext', '')
-            resolution = f.get('resolution') or f.get('height')
+            resolution = f.get('height')  # عدد بهتره
             filesize = f.get('filesize') or f.get('filesize_approx')
 
             if not vcodec or vcodec == 'none':
-                continue  # حذف فرمت‌های بدون تصویر
+                continue  # حذف فرمت‌های بدون ویدیو
 
             is_combined = (
                 ext == 'mp4' and
@@ -41,12 +41,7 @@ def formats():
                 not f.get('format_note', '').lower().startswith('dash')
             )
 
-            is_audio_or_video = (
-                acodec != 'none' or 
-                (resolution and str(resolution).isdigit() and int(resolution) > 360)
-            )
-
-            if is_combined or is_audio_or_video:
+            if is_combined:
                 filtered_formats.append({
                     'format_id': f.get('format_id'),
                     'ext': ext,
@@ -56,7 +51,7 @@ def formats():
                     'vcodec': vcodec,
                     'acodec': acodec,
                     'note': f.get('format_note', ''),
-                    'combined': is_combined
+                    'combined': True
                 })
 
         return jsonify({
@@ -86,7 +81,7 @@ def download():
             download_status['progress'] = {'finished': True}
 
     try:
-        output_template = '/sdcard/Download/DownTube/downloaded_video.%(ext)s'
+        output_template = '/sdcard/Download/DownTube/%(title)s.%(ext)s'
         ydl_opts = {
             'format': format_id,
             'outtmpl': output_template,
@@ -104,6 +99,11 @@ def download():
 @app.route('/progress')
 def progress():
     return jsonify(download_status.get('progress', {}))
+
+@app.route('/getfile/<filename>')
+def get_file(filename):
+    folder = '/sdcard/Download/DownTube'
+    return send_from_directory(folder, filename, as_attachment=True)
 
 if __name__ == '__main__':
     app.run(host='0.0.0.0', debug=True)

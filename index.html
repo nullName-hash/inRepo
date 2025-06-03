@@ -18,10 +18,10 @@ body {
    display: flex;
    flex-direction: column;
    align-items: center;
+   text-align: center;
    padding: 0px;
    min-height: 100vh;
    margin: 0;
-   box-shadow: 0 0 .4em .1em #8A2BE2;
 }
 h1 {
    display: inline-block;
@@ -29,7 +29,7 @@ h1 {
    padding: 12.5px 30px;
    transition:1s;
    font-family: "Poppins";
-   font-size: 3.33em;
+   font-size: 3.43em;
    background: linear-gradient(to right, #00BFFF, #8A2BE2, #32CD32, #888888);
    -webkit-background-clip: text;
    -webkit-text-fill-color: transparent;
@@ -37,14 +37,17 @@ h1 {
    color: transparent;
    margin: 1.2em 0em 1.2em 0em;
    overflow: hidden;
-   letter-spacing: 1px;
+ -webkit-box-reflect: below 0px
+    linear-gradient(to bottom, rgba(0, 0, 0, 0), rgba(0, 0, 0, 0.4));
 
 }
 h1 span {
   position: absolute;
   display: block;
+  
 }
 h1 span:nth-child(1) {
+   border-radius: 10em;
   top: 0;
   left: 0;
   width: 100%;
@@ -62,6 +65,7 @@ h1 span:nth-child(1) {
   }
 }
 h1 span:nth-child(2) {
+  border-radius: 10em;
   top: -100%;
   right: 0;
   width: 10px;
@@ -80,6 +84,7 @@ h1 span:nth-child(2) {
   }
 }
 h1 span:nth-child(3) {
+  border-radius: 10em;
   bottom: 0;
   right: 0;
   width: 100%;
@@ -98,6 +103,7 @@ h1 span:nth-child(3) {
   }
 }
 h1 span:nth-child(4) {
+  border-radius: 10em;
   bottom: -100%;
   left: 0;
   width: 10px;
@@ -121,7 +127,7 @@ p{
    margin-bottom: 1.2em;
    text-align: center;
    align-items: center;
-   background: linear-gradient(to right, #00BFFF, #8A2BE2, #32CD32, #888888);
+   background: linear-gradient(to right, rgb(32,131,255), #8A2BE2, #32CD32, #888888);
    -webkit-background-clip: text;
    -webkit-text-fill-color: transparent;
    background-clip: text;
@@ -142,10 +148,12 @@ input {
    width: 20em;
    max-width: 90vw;
    color: #f9f9f9;
-   transition: .22s;
+   transition: .21s;
 }
 input:hover{
-   background: #333;
+   background: rgb(2, 29, 78);
+   background: linear-gradient(270deg,rgba(2, 29, 78, 0.681),rgba(2, 29, 78, 0.681));
+   color: #00BFFF;
 }
 input:focus{
    outline: none;
@@ -163,27 +171,44 @@ select {
    outline: none;
    box-shadow: none;
    -webkit-tap-highlight-color: transparent;
-   box-shadow: 0 0 .4em .1em #8A2BE2;}
+   box-shadow: 0 0 .4em .1em #8A2BE2;
 }
 option{
-   background: green ;
+   background: green;
 }
 button {
    display:flex;
    text-align:center;
    justify-content:center;
-   margin: 1em;
-   background:  #00BFFF;
-   color: white;
+   margin: 1.333em 0;
+   background:  rgb(32,131,255);
+   color: #000;
    cursor: pointer;
    transition: background 0.2s ease;
    width: 9em;
    max-width: 90vw;
    transition: .1s;
+   -webkit-box-reflect: below 0px
+   linear-gradient(to bottom, rgba(0, 0, 0, 0), rgba(0, 0, 0, 0.15));
 }
 button:active {
    background: #8A2BE2;
    scale: 1.02;
+}
+#buttons{
+   display:flex;
+   text-align:center;
+   justify-content:center;
+   margin: 1.333em 0;
+   background:  rgb(32,131,255);
+   color: #000;
+   cursor: pointer;
+   transition: background 0.2s ease;
+   width: 9em;
+   max-width: 90vw;
+   transition: .1s;
+   -webkit-box-reflect: below 0px
+   linear-gradient(to bottom, rgba(0, 0, 0, 0), rgba(0, 0, 0, 0.15));
 }
 #formats {
    display: flex;
@@ -195,13 +220,14 @@ button:active {
    max-width: 80vh;
 }
 #message {
+   font-size: 1.3em;
    display: flex;text-align: center;align-items: center;
+   background: lightblue;
    margin-top: 1em;
+   margin-bottom: 1.2em;
    min-height: 2em;
 }
-
-</style>
-</head><body>
+</style></head><body>
 <div class>
 <h1 id="siteTitle">
    <div id="spanS">
@@ -216,18 +242,17 @@ button:active {
 <p id="text">
    دانلودر یوتیوب
 </p>
-<input type="text" id="url" placeholder="لینک ویدیو یوتیوب را وارد کنید" />
+<input type="url" id="url" placeholder="لینک ویدیو یوتیوب را وارد کنید" />
 <button onclick="fetchFormats()">
    دریافت فرمت‌ها
 </button>
 <div id="formats" style="display:none;">
-   <select id="formatSelect">
-      
-   </select>
-   <button onclick="download()">دانلود</button>
+   <select id="formatSelect"></select>
+   <button onclick="download()" id="downloadBtn">دانلود</button>
 </div>
 <div id="message"></div>
 <button id="btn" type="submit"></button>
+
 <script>
 const getTitle = document.getElementById("siteTitle");
 const title = "DøwnTube";
@@ -252,27 +277,21 @@ async function fetchFormats() {
       alert('لطفاً لینک ویدیو را وارد کنید.');
       return;
    }
-   
    document.getElementById('message').textContent = 'در حال دریافت فرمت‌ها...';
-   
    try {
       const response = await fetch('/formats', {
          method: 'POST',
          headers: { 'Content-Type': 'application/json' },
          body: JSON.stringify({ url })
       });
-      
       const data = await response.json();
-      
       if (data.error) {
-         document.getElementById('message').textContent = 'خطا: ' + data.error;
+         document.getElementById('message').textContent = 'خطا : ' + data.error;
          document.getElementById('formats').style.display = 'none';
          return;
       }
-      
       const select = document.getElementById('formatSelect');
       select.innerHTML = '';
-      
       // فیلتر کردن ویدیو های ترکیب شده با صدا 
       const usableFormats = data.formats.filter(f => f.combined);
       if (usableFormats.length === 0) {
@@ -288,16 +307,13 @@ async function fetchFormats() {
          option.textContent = text;
          select.appendChild(option);
       });
-      
-      document.getElementById('message').textContent = `عنوان: ${data.title}`;
+      document.getElementById('message').textContent = `عنوان : ${data.title}`;
       document.getElementById('formats').style.display = 'block';
-      
    } catch (e) {
       document.getElementById('message').textContent = 'خطا: ' + e.message;
       document.getElementById('formats').style.display = 'none';
    }
 }
-
 async function download() {
    const url = document.getElementById('url').value.trim();
    const format_id = document.getElementById('formatSelect').value;
@@ -306,27 +322,23 @@ async function download() {
       alert('لطفاً لینک و فرمت را انتخاب کنید.');
       return;
    }
-   
    document.getElementById('message').textContent = 'در حال دانلود...';
-   
    try {
       const response = await fetch('/download', {
          method: 'POST',
          headers: { 'Content-Type': 'application/json' },
          body: JSON.stringify({ url, format_id })
       });
-      
       const data = await response.json();
-      
       if (data.error) {
-         document.getElementById('message').textContent = 'خطا: ' + data.error;
+         document.getElementById('message').textContent = 'خطا : ' + data.error;
          return;
       }
-      
       document.getElementById('message').textContent = data.message;
+      document.getElementById('downloadBtn').textContent = data.message;
       
    } catch (e) {
-      document.getElementById('message').textContent = 'خطا: ' + e.message;
+      document.getElementById('message').textContent = 'خطا : ' + e.message;
    }
 }
 </script></body></html>
